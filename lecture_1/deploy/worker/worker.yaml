@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: category-match
+spec:
+  selector:
+    matchLabels:
+      app: category-match
+  serviceName: category-match
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: category-match
+    spec:
+      containers:
+        - name: main
+          image: byeongjokim/worker:0.1.0
+          command: ['/bin/bash', '-c']
+          args:
+            - git clone https://github.com/byeongjokim/fast-campus-lecture &&
+              cd fast-campus-lecture/lecture_1/deploy/worker/src &&
+              python main.py
+          volumeMounts:
+          - name: nfs-volume
+            mountPath: /data
+      volumes:
+      - name: nfs-volume
+        persistentVolumeClaim:
+          claimName: nfs-pvc
