@@ -1,4 +1,3 @@
-#
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,17 +16,16 @@ spec:
         - name: main
           image: myoung34/github-runner:2.311.0
           env:
-          - name: ACCESS_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: github-secrets
-                key: ACCESS_TOKEN
-          - name: REPO_URL
-            value: "https://github.com/0hyeon/airflow"
-          - name: RUNNER_SCOPE
-            value: "repo"
-          - name: RUNNER_LABELS
-            value: "self-hosted,Linux,airflow"
+            - name: ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: github-secrets
+                  key: ACCESS_TOKEN
+            - name: REPO_URL
+              value: "https://github.com/0hyeon/airflow"
+            - name: RUNNER_SCOPE
+              value: "repo"
+          args: [ "--labels", "self-hosted,Linux,airflow" ]
           volumeMounts:
             - name: nfs-volume
               mountPath: /data
