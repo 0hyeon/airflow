@@ -83,7 +83,7 @@ spec:
           args:
             - until [ -n "`psql $AIRFLOW__DATABASE__SQL_ALCHEMY_CONN -l`" ]; do echo "Waiting"; sleep 10; done;
               airflow db init;
-              airflow users create --username admin --firstname admin --lastname admin --role Admin --email byeongjokim@naver.com --password admin
+              airflow users create --username admin --firstname admin --lastname admin --role Admin --email djdjdjk2006@naver.com --password admin
           volumeMounts:
             - name: airflow-pvc
               mountPath: /airflow

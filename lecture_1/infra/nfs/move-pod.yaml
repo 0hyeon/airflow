@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
   - name: main
-    image: byeongjokim/worker:0.1.0
+    image: 0hyeon/worker:0.1.0
     command: [ "/bin/bash", "-c", "--" ]
     args: [ "sleep infinity" ]
     volumeMounts:

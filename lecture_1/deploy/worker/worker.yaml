@@ -15,11 +15,11 @@ spec:
     spec:
       containers:
         - name: main
-          image: byeongjokim/worker:0.1.0
+          image: 0hyeon/worker:0.1.0
           command: ['/bin/bash', '-c']
           args:
-            - git clone https://github.com/byeongjokim/fast-campus-lecture &&
-              cd fast-campus-lecture/lecture_1/deploy/worker/src &&
+            - git clone https://github.com/0hyeon/airflow &&
+              cd airflow/lecture_1/deploy/worker/src &&
               python main.py
           volumeMounts:
           - name: nfs-volume
