@@ -17,15 +17,11 @@ spec:
           image: myoung34/github-runner:2.311.0
           env:
             - name: ACCESS_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: github-secrets
-                  key: ACCESS_TOKEN
+              value: 
             - name: REPO_URL
               value: "https://github.com/0hyeon/airflow"
             - name: RUNNER_SCOPE
               value: "repo"
-          args: [ "--labels", "self-hosted,Linux,airflow" ]
           volumeMounts:
             - name: nfs-volume
               mountPath: /data
