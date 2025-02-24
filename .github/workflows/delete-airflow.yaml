@@ -9,8 +9,8 @@ jobs:
       - name: checkout repo
         uses: actions/checkout@v2
         with:
-          repository: byeongjokim/fast-campus-lecture
-          path: fast-campus-lecture
+          repository: 0hyeon/airflow
+          path: airflow
           ref: ${{ github.ref }}
 
       - name: install kubectl, helm
@@ -26,12 +26,12 @@ jobs:
 
       - name: delete airflow
         run: |
-          cd fast-campus-lecture/lecture_2
+          cd airflow/lecture_2
 
           helm template airflow --set appName=${REF_NAME} | kubectl delete -f -
 
       - name: delete pg db
         run: |
-          cd fast-campus-lecture/lecture_2
+          cd airflow/lecture_2
 
           cat job/db-delete.yaml | sed -r "s:BRANCH:${REF_NAME}:g" | kubectl apply -f -
