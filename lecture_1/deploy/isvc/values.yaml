@@ -1,0 +1,5 @@
+appName: category-match
+version: 231209
+
+modelFormat: tensorflow
+storageUri: pvc://nfs-pvc/model-store
