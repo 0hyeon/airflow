@@ -14,10 +14,10 @@ spec:
     spec:
       containers:
         - name: main
-          image: myoung34/github-runner:2.311.0
+          image: myoung34/github-runner:2.322.0
           env:
             - name: ACCESS_TOKEN
-              value: 
+              value: ""
             - name: REPO_URL
               value: "https://github.com/0hyeon/airflow"
             - name: RUNNER_SCOPE
