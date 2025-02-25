@@ -1,0 +1,46 @@
+# apiVersion: keda.sh/v1alpha1
+# kind: ScaledObject
+# metadata:
+#   name: airflow-scheduler-scaledobject
+#   namespace: default
+# spec:
+#   scaleTargetRef:
+#     kind: Deployment
+#     name: airflow-scheduler
+#   minReplicaCount: 0                 # 트래픽 없을 때 Pod 0개 유지
+#   maxReplicaCount: 20                # 현재 클러스터에서 감당 가능한 최대 Pod 개수
+#   pollingInterval: 5                 # 5초마다 Kafka 상태 체크하여 실시간 반응
+#   cooldownPeriod: 180                # 스케일 다운 전에 180초 대기하여 불필요한 변동 방지
+#   triggers:
+#     - type: kafka
+#       metadata:
+#         bootstrapServers: "broker:29092"  # Kafka 브로커 주소
+#         topic: "apps_flyer_data"         # 토픽 이름
+#         consumerGroup: "airflow-consumer"
+#         lagThreshold: "500"              # 메시지 500개 이상 → Pod 추가 생성 (RTS 500 이상)
+#         activationLagThreshold: "10"     # 메시지 10개 이상 → 최소 1개 Pod 유지
+#     - type: cpu
+#       metadata:
+#         type: Utilization
+#         value: "75"                      # CPU 사용률이 75% 초과하면 Pod 추가 생성
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: airflow-scheduler-scaledobject
+  namespace: default
+spec:
+  scaleTargetRef:
+    kind: Deployment
+    name: airflow-scheduler
+  minReplicaCount: 0                 # 트래픽 없을 때 Pod 0개 유지
+  maxReplicaCount: 30                # 배치처리 시 최대 30개까지 확장 가능
+  pollingInterval: 30                # 30초마다 Kafka 상태 체크하여 배치 단위로 반응
+  cooldownPeriod: 300                # 스케일 다운 전에 300초(5분) 대기하여 안정적 처리
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: "broker:29092"  # Kafka 브로커 주소
+        topic: "apps_flyer_data"         # 토픽 이름
+        consumerGroup: "airflow-consumer"
+        lagThreshold: "3000"             # 메시지 3000개 이상 → Pod 추가 생성
+        activationLagThreshold: "100"    # 메시지 100개 이상 → 최소 1개 Pod 유지

@@ -301,6 +301,16 @@ spec:
             - name: airflow-pvc
               mountPath: /airflow
               subPath: airflow
+        # pandas boto3 추가 init library
+        - name: install-packages  
+          image: apache/airflow:2.3.2
+          imagePullPolicy: IfNotPresent
+          command: ['bash', '-c']
+          args:
+            - pip install pandas boto3
+          volumeMounts:
+            - name: airflow-pvc
+              mountPath: /dags
       containers:
         - name: airflow-scheduler
           image: apache/airflow:2.3.2
