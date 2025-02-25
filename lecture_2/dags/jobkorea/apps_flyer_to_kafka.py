@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
+#
 # Kafka 설정
 KAFKA_BROKER = "broker:29092"
 KAFKA_TOPIC = "apps_flyer_data"
