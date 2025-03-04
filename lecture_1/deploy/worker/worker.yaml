@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: main
-          image: 0hyeon/worker:0.1.1
+          image: 0hyeon/worker:0.1.4
           imagePullPolicy: Always  # 🔥 매번 최신 이미지 가져오기
           env:
             - name: JOBKOREA_TOKEN

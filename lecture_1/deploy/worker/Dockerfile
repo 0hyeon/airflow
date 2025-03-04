@@ -1,5 +1,6 @@
-# docker build . -t 0hyeon/worker:0.1.1
-# docker push 0hyeon/worker:0.1.1
+# docker build . -t 0hyeon/worker:0.1.4
+# docker push 0hyeon/worker:0.1.4
+# 후에 worker.yaml 수정
 
 FROM python:3.9
 
@@ -17,4 +18,16 @@ RUN pip install --no-cache-dir \
     confluent-kafka==2.3.0 \
     pandas==2.1.3 \
     konlpy==0.6.0 \
-    boto3
+    boto3 \
+    requests \
+    apache-airflow==2.10.5 \
+    apache-airflow-providers-cncf-kubernetes==10.1.0 \
+    apache-airflow-providers-common-compat==1.3.0 \
+    apache-airflow-providers-common-io==1.5.0 \
+    apache-airflow-providers-common-sql==1.7.0 \
+    apache-airflow-providers-fab==1.5.3 \
+    apache-airflow-providers-ftp==3.5.0 \
+    apache-airflow-providers-http==4.5.0 \
+    apache-airflow-providers-imap==3.3.0 \
+    apache-airflow-providers-smtp==1.9.0 \
+    apache-airflow-providers-sqlite==3.4.3 \
