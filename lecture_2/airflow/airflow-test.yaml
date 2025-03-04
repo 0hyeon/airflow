@@ -1,4 +1,5 @@
 ---
+#
 # Source: airflow/templates/airflow-config.yaml
 # https://airflow.apache.org/docs/apache-airflow/2.3.2/configurations-ref.html
 apiVersion: v1
@@ -229,6 +230,12 @@ spec:
       labels:
         deploy: airflow-web
     spec:
+      initContainers:  # 📌 추가된 부분
+        - name: install-packages
+          image: apache/airflow:2.3.2
+          command: ["/bin/bash", "-c"]
+          args:
+            - pip install confluent-kafka pandas boto3 requests pyarrow;
       containers:
         - name: airflow-web
           image: apache/airflow:2.3.2
@@ -301,13 +308,13 @@ spec:
             - name: airflow-pvc
               mountPath: /airflow
               subPath: airflow
-        # pandas boto3 추가 init library
+        # pip install pandas boto3 kafka-python pyarrow 자동설치
         - name: install-packages  
           image: apache/airflow:2.3.2
           imagePullPolicy: IfNotPresent
           command: ['bash', '-c']
           args:
-            - pip install pandas boto3
+            - pip install pandas boto3 kafka-python pyarrow
           volumeMounts:
             - name: airflow-pvc
               mountPath: /dags
