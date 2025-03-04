@@ -16,6 +16,12 @@ spec:
       containers:
         - name: main
           image: 0hyeon/worker:0.1.0
+          env:
+            - name: JOBKOREA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: jobkorea-token-secret
+                  key: JOBKOREA_TOKEN
           command: ['/bin/bash', '-c']
           args:
             - git clone https://github.com/0hyeon/airflow &&
