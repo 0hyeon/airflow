@@ -1,3 +1,4 @@
+# 로그확인하기 kubectl logs category-match-0
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -15,10 +16,17 @@ spec:
     spec:
       containers:
         - name: main
-          image: 0hyeon/worker:0.1.0
+          image: 0hyeon/worker:0.1.4
+          imagePullPolicy: Always  # 🔥 매번 최신 이미지 가져오기
+          env:
+            - name: JOBKOREA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: jobkorea-token-secret
+                  key: JOBKOREA_TOKEN
           command: ['/bin/bash', '-c']
           args:
-            - git clone https://github.com/0hyeon/airflow &&
+            - git clone -b 0hyeon https://github.com/0hyeon/airflow &&
               cd airflow/lecture_1/deploy/worker/src &&
               python main.py
           volumeMounts:
