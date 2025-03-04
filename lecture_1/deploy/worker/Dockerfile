@@ -1,5 +1,5 @@
-# docker build . -t byeongjokim/worker:0.1.0
-# docker push byeongjokim/worker:0.1.0
+# docker build . -t 0hyeon/worker:0.1.0
+# docker push 0hyeon/worker:0.1.0
 
 FROM python:3.9
 
