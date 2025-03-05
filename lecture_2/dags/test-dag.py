@@ -87,7 +87,6 @@ with DAG(
         python_callable=fetch_and_save_data,
     )
 
-    task_stream_kafka >> task_consume_s3  # 실행 순서 지정
 # import datetime
 
 # from airflow import DAG
