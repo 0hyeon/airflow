@@ -20,11 +20,12 @@ to_date = "2025-03-01"
 TOKEN = os.getenv("JOBKOREA_TOKEN")
 HEADERS = {"accept": "application/json", "authorization": f"Bearer {TOKEN}"}
 URLS = {
-    "1pick_view_jobposting_AOS": f"https://hq1.appsflyer.com/api/raw-data/export/app/com.jobkorea.app/in-app-events-retarget/v5?from={from_date:%Y-%m-%d}&to={to_date:%Y-%m-%d}&timezone=Asia%2FSeoul&category=standard&event_name=1pick_view_jobposting",
+    "1pick_view_jobposting_AOS": f"https://hq1.appsflyer.com/api/raw-data/export/app/com.jobkorea.app/in-app-events-retarget/v5?from={from_date}&to={to_date}&timezone=Asia%2FSeoul&category=standard&event_name=1pick_view_jobposting",
     # "1pick_view_jobposting_iOS": f"https://hq1.appsflyer.com/api/raw-data/export/app/id569092652/in_app_events_report/v5?from={from_date:%Y-%m-%d}&to={to_date:%Y-%m-%d}&timezone=Asia%2FSeoul&category=standard&event_name=1pick_view_jobposting",
     # "careercheck_assess_complete_AOS": f"https://hq1.appsflyer.com/api/raw-data/export/app/com.jobkorea.app/in_app_events_report/v5?from={from_date:%Y-%m-%d}&to={to_date:%Y-%m-%d}&timezone=Asia%2FSeoul&category=standard&event_name=careercheck_assess_complete",
     # "careercheck_assess_complete_iOS": f"https://hq1.appsflyer.com/api/raw-data/export/app/id569092652/in-app-events-retarget/v5?from={from_date:%Y-%m-%d}&to={to_date:%Y-%m-%d}&timezone=Asia%2FSeoul&category=standard&event_name=careercheck_assess_complete",
 }
+
 # **S3 설정**
 S3_BUCKET = "fc-practice2"
 S3_KEY_PREFIX = "apps_flyer_data/"
