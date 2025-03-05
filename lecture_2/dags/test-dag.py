@@ -18,7 +18,18 @@ from_date = "2025-03-01"
 to_date = "2025-03-01"
 
 TOKEN = os.getenv("JOBKOREA_TOKEN")
+print(TOKEN)
+
+
+def test_aws_env():
+    print(f"AWS_ACCESS_KEY_ID: {os.getenv('AWS_ACCESS_KEY_ID')}")
+    print(f"AWS_SECRET_ACCESS_KEY: {os.getenv('AWS_SECRET_ACCESS_KEY')}")
+    print(f"AWS_DEFAULT_REGION: {os.getenv('AWS_DEFAULT_REGION')}")
+
+
 HEADERS = {"accept": "application/json", "authorization": f"Bearer {TOKEN}"}
+
+
 ##
 URLS = {
     "1pick_view_jobposting_AOS": f"https://hq1.appsflyer.com/api/raw-data/export/app/com.jobkorea.app/in-app-events-retarget/v5?from={from_date}&to={to_date}&timezone=Asia%2FSeoul&category=standard&event_name=1pick_view_jobposting",
@@ -34,7 +45,13 @@ S3_KEY_PREFIX = "apps_flyer_data/"
 
 # **S3 저장 함수**
 def save_to_s3(records, filename):
-    s3_client = boto3.client("s3")
+    session = boto3.Session(
+        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        region_name=os.getenv("AWS_DEFAULT_REGION"),
+    )
+    s3_client = session.client("s3")
+    # s3_client = boto3.client("s3")
     file_path = (
         f"{S3_KEY_PREFIX}{filename}_{datetime.now().strftime('%Y-%m-%d')}.parquet"
     )
