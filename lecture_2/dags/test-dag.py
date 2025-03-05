@@ -71,14 +71,11 @@ def fetch_and_save_data():
             print(f"📡 Fetching data from {url}")
             response = requests.get(url, headers=HEADERS)
             response.raise_for_status()
-            data = response.json()
+            data = response.json()  # JSON 데이터
 
             if not data:
                 print(f"⚠️ No data for {filename}, skipping.")
                 continue
-
-            print(f"✅ API 응답 데이터: {data[:5]}")  # 일부 데이터 출력
-            print(f"✅ 데이터 타입: {type(data)}")
 
             save_to_s3(data, filename)
 
