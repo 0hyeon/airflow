@@ -230,14 +230,6 @@ spec:
       labels:
         deploy: airflow-web
     spec:
-      initContainers:  # 📌 추가된 부분
-        - name: install-packages
-          image: apache/airflow:2.3.2
-          command: ["/bin/bash", "-c"]
-          args:
-            - pip install --no-cache-dir pandas boto3 requests pyarrow confluent-kafka==2.3.0 &&
-              airflow scheduler;
-
       containers:
         - name: airflow-web
           image: apache/airflow:2.3.2
@@ -262,7 +254,10 @@ spec:
               subPath: airflow-web-config-template.py
           command: ['/bin/bash', '-c']
           args:
-            - airflow webserver;
+            - pip install --no-cache-dir pandas boto3 requests pyarrow confluent-kafka &&
+              airflow webserver;
+          # args:
+          #   - airflow webserver;
       restartPolicy: Always
       volumes:
         - name: airflow-pvc
