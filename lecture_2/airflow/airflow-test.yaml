@@ -248,6 +248,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: airflow-config
+            - secretRef:
+                name: aws-credentials
           volumeMounts:
             - name: airflow-pvc
               mountPath: /dags
@@ -331,6 +333,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: airflow-config
+            - secretRef:
+                name: aws-credentials
           volumeMounts:
             - name: airflow-pvc
               mountPath: /dags
