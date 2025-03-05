@@ -33,7 +33,7 @@ data:
     kind: Pod
     metadata: dummy
     spec:
-      restartPollicy: Never
+      restartPolicy: Never
       containers:
         - name: base
           envFrom:
@@ -228,24 +228,18 @@ spec:
       labels:
         deploy: airflow-web
     spec:
-      initContainers:
-        - name: install-packages
-          image: apache/airflow:2.3.2
-          command: ["/bin/bash", "-c"]
-          args:
-            - pip install pandas boto3 requests pyarrow;
       containers:
         - name: airflow-web
           image: apache/airflow:2.3.2
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
-          env:
-            - name: AIRFLOW__CORE__EXECUTOR
-              value: "KubernetesExecutor"
           envFrom:
             - configMapRef:
                 name: airflow-config
+          env:
+            - name: AIRFLOW__CORE__EXECUTOR
+              value: "KubernetesExecutor"
           volumeMounts:
             - name: airflow-pvc
               mountPath: /dags
@@ -256,9 +250,8 @@ spec:
             - name: airflow-templates
               mountPath: /opt/airflow/webserver_config.py
               subPath: airflow-web-config-template.py
-            - name: nfs-env-volume  # 📌 NFS에 있는 .env 파일 마운트
-              mountPath: /mnt/nts/.env
-              subPath: .env
+            - name: nfs-env-volume  # ✅ NFS 볼륨 추가
+              mountPath: /mnt/nts
           command: ['/bin/bash', '-c']
           args:
             - pip install --no-cache-dir pandas boto3 requests pyarrow confluent-kafka &&
@@ -274,9 +267,12 @@ spec:
             items:
               - key: airflow-web-config-template.py
                 path: airflow-web-config-template.py
-        - name: nfs-env-volume  # 📌 NFS 볼륨 추가
+        - name: nfs-env-volume  # ✅ NFS 볼륨 추가
           persistentVolumeClaim:
             claimName: nfs-pvc
+
+
+
 
 ---
 # Source: airflow/templates/airflow-deployment.yaml
@@ -296,13 +292,6 @@ spec:
       labels:
         deploy: airflow-scheduler
     spec:
-      initContainers:
-        - name: install-packages
-          image: apache/airflow:2.3.2
-          imagePullPolicy: IfNotPresent
-          command: ['bash', '-c']
-          args:
-            - pip install pandas boto3 kafka-python pyarrow confluent-kafka
       containers:
         - name: airflow-scheduler
           image: apache/airflow:2.3.2
@@ -320,9 +309,8 @@ spec:
             - name: airflow-templates
               mountPath: /airflow-pod.yaml
               subPath: airflow-pod.yaml
-            - name: nfs-env-volume  # 📌 NFS에 있는 .env 파일 마운트
-              mountPath: /mnt/nts/.env
-              subPath: .env
+            - name: nfs-env-volume
+              mountPath: /mnt/nts
           command: ['/bin/bash', '-c']
           args:
             - export $(grep -v '^#' /mnt/nts/.env | xargs) && airflow scheduler;
