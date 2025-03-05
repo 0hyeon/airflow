@@ -230,6 +230,12 @@ spec:
       labels:
         deploy: airflow-web
     spec:
+      initContainers:  # 📌 추가된 부분
+        - name: install-packages
+          image: apache/airflow:2.3.2
+          command: ["/bin/bash", "-c"]
+          args:
+            - pip install pandas boto3 requests pyarrow;
       containers:
         - name: airflow-web
           image: apache/airflow:2.3.2
