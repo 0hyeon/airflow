@@ -235,7 +235,7 @@ spec:
           image: apache/airflow:2.3.2
           command: ["/bin/bash", "-c"]
           args:
-            - pip install confluent-kafka==2.8.2 pandas boto3 requests pyarrow;
+            - pip install pandas boto3 requests pyarrow;
       containers:
         - name: airflow-web
           image: apache/airflow:2.3.2
