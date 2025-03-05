@@ -212,13 +212,11 @@ spec:
       targetPort: 8080
 ---
 # Source: airflow/templates/airflow-deployment.yaml
+# Airflow 웹서버 (Webserver)
 kind: StatefulSet
 apiVersion: apps/v1
 metadata:
   name: airflow-web
-  labels:
-    app.kubernetes.io/instance: airflow
-    app.kubernetes.io/name: airflow
 spec:
   serviceName: airflow
   replicas: 1
@@ -230,7 +228,7 @@ spec:
       labels:
         deploy: airflow-web
     spec:
-      initContainers:  # 📌 추가된 부분
+      initContainers:
         - name: install-packages
           image: apache/airflow:2.3.2
           command: ["/bin/bash", "-c"]
@@ -258,12 +256,13 @@ spec:
             - name: airflow-templates
               mountPath: /opt/airflow/webserver_config.py
               subPath: airflow-web-config-template.py
+            - name: nfs-env-volume  # 📌 NFS에 있는 .env 파일 마운트
+              mountPath: /mnt/nts/.env
+              subPath: .env
           command: ['/bin/bash', '-c']
           args:
             - pip install --no-cache-dir pandas boto3 requests pyarrow confluent-kafka &&
-              airflow webserver;
-          # args:
-          #   - airflow webserver;
+              export $(grep -v '^#' /mnt/nts/.env | xargs) &&  airflow webserver;
       restartPolicy: Always
       volumes:
         - name: airflow-pvc
@@ -275,15 +274,17 @@ spec:
             items:
               - key: airflow-web-config-template.py
                 path: airflow-web-config-template.py
+        - name: nfs-env-volume  # 📌 NFS 볼륨 추가
+          persistentVolumeClaim:
+            claimName: nfs-pvc
+
 ---
 # Source: airflow/templates/airflow-deployment.yaml
+# Airflow 스케줄러 (Scheduler)
 kind: StatefulSet
 apiVersion: apps/v1
 metadata:
   name: airflow-scheduler
-  labels:
-    app.kubernetes.io/instance: airflow
-    app.kubernetes.io/name: airflow
 spec:
   serviceName: airflow
   replicas: 1
@@ -296,38 +297,16 @@ spec:
         deploy: airflow-scheduler
     spec:
       initContainers:
-        - name: init-db
-          image: apache/airflow:2.3.2
-          imagePullPolicy: Always
-          env:
-            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-              value: "postgresql://airflow:airflow@airflow-postgres:5432/airflow"
-          command: ['/bin/bash', '-c']
-          args:
-            - until [ -n "`psql $AIRFLOW__DATABASE__SQL_ALCHEMY_CONN -l`" ]; do echo "Waiting"; sleep 10; done;
-              airflow db init;
-              airflow users create --username admin --firstname admin --lastname admin --role Admin --email djdjdjk2006@naver.com --password admin
-          volumeMounts:
-            - name: airflow-pvc
-              mountPath: /airflow
-              subPath: airflow
-        # pip install pandas boto3 kafka-python pyarrow 자동설치
-        - name: install-packages  
+        - name: install-packages
           image: apache/airflow:2.3.2
           imagePullPolicy: IfNotPresent
           command: ['bash', '-c']
           args:
             - pip install pandas boto3 kafka-python pyarrow confluent-kafka
-          volumeMounts:
-            - name: airflow-pvc
-              mountPath: /dags
       containers:
         - name: airflow-scheduler
           image: apache/airflow:2.3.2
           imagePullPolicy: Always
-          env:
-            - name: AIRFLOW__CORE__EXECUTOR
-              value: "KubernetesExecutor"
           envFrom:
             - configMapRef:
                 name: airflow-config
@@ -341,9 +320,12 @@ spec:
             - name: airflow-templates
               mountPath: /airflow-pod.yaml
               subPath: airflow-pod.yaml
+            - name: nfs-env-volume  # 📌 NFS에 있는 .env 파일 마운트
+              mountPath: /mnt/nts/.env
+              subPath: .env
           command: ['/bin/bash', '-c']
           args:
-            - airflow scheduler;
+            - export $(grep -v '^#' /mnt/nts/.env | xargs) && airflow scheduler;
       restartPolicy: Always
       volumes:
         - name: airflow-pvc
@@ -356,3 +338,6 @@ spec:
               - key: airflow-pod.yaml
                 path: airflow-pod.yaml
                 mode: 0777
+        - name: nfs-env-volume  # 📌 NFS 볼륨 추가
+          persistentVolumeClaim:
+            claimName: nfs-pvc
