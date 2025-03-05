@@ -314,7 +314,7 @@ spec:
           imagePullPolicy: IfNotPresent
           command: ['bash', '-c']
           args:
-            - pip install pandas boto3 kafka-python pyarrow
+            - pip install pandas boto3 kafka-python pyarrow confluent-kafka==2.8.2
           volumeMounts:
             - name: airflow-pvc
               mountPath: /dags
