@@ -11,6 +11,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.models import Variable
 
+#
 # 날짜 설정
 from_date = "2025-03-01"
 to_date = "2025-03-01"
