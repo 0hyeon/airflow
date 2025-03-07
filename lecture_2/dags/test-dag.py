@@ -41,16 +41,19 @@ def save_to_s3(records, filename):
     )
     s3_client = session.client("s3")
 
-    # S3에 날짜별 폴더 생성하여 저장
     file_path_parquet = f"{S3_KEY_PREFIX}{yesterday:%Y-%m-%d}/{filename}.parquet"
 
     try:
         # CSV 데이터 변환
-        df = pd.read_csv(StringIO(records), encoding="utf-8-sig")
+        df = pd.read_csv(StringIO(records), encoding="utf-8-sig", low_memory=False, dtype={'Postal Code': str})
 
         if df.empty:
             print(f"⚠️ DataFrame is empty for {filename}, skipping S3 upload.")
             return
+
+        # Postal Code 컬럼 강제 변환 (예방 차원)
+        if 'Postal Code' in df.columns:
+            df['Postal Code'] = df['Postal Code'].astype(str)
 
         # 임시 Parquet 파일 생성
         temp_file_parquet = f"/tmp/{filename}.parquet"
@@ -94,7 +97,7 @@ default_args = {
 }
 
 with DAG(
-    dag_id="daily_s3_storage_sequential",
+    dag_id="jobko_apps_deduction_daily_to_s3_storage_sequential",
     default_args=default_args,
     schedule_interval="@daily",  # 매일 실행
     catchup=False,
