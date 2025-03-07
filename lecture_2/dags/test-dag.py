@@ -52,7 +52,7 @@ with DAG(
             image="0hyeon/hyeon-airflow-image:latest",  # ✅ 사용자 정의 이미지 사용
             cmds=["python", "-c"],
             arguments=[
-                f"""
+                """
 import requests
 import boto3
 import pandas as pd
@@ -64,13 +64,13 @@ from datetime import datetime, timedelta
 yesterday = datetime.now() - timedelta(days=1)
 yesterday_str = yesterday.strftime('%Y-%m-%d')
 
-TOKEN = '{TOKEN}'
-HEADERS = {HEADERS}
-S3_BUCKET = '{S3_BUCKET}'
-S3_KEY_PREFIX = '{S3_KEY_PREFIX}'
+TOKEN = os.getenv("TOKEN")
+HEADERS = {"accept": "application/json", "authorization": f"Bearer {TOKEN}"}
+S3_BUCKET = os.getenv("S3_BUCKET")
+S3_KEY_PREFIX = os.getenv("S3_KEY_PREFIX")
 
-url = '{url}'
-filename = '{filename}'
+url = os.getenv("URL")
+filename = os.getenv("FILENAME")
 
 try:
     print(f"📡 Fetching data from {url}")
@@ -89,7 +89,7 @@ try:
     )
     s3_client = session.client("s3")
 
-    df = pd.read_csv(StringIO(csv_data), encoding="utf-8-sig", low_memory=False, dtype={{'Postal Code': str}})
+    df = pd.read_csv(StringIO(csv_data), encoding="utf-8-sig", low_memory=False, dtype={'Postal Code': str})
 
     if df.empty:
         print(f"⚠️ DataFrame is empty for {filename}, skipping S3 upload.")
@@ -98,7 +98,6 @@ try:
     temp_file_parquet = f"/tmp/{filename}.parquet"
     df.to_parquet(temp_file_parquet, engine="pyarrow", index=False)
 
-    # ✅ 여기서 `file_path_parquet`을 문자열로 변환 후 사용
     file_path_parquet = f"{S3_KEY_PREFIX}date={yesterday_str}/{filename}.parquet"
     s3_client.upload_file(temp_file_parquet, S3_BUCKET, file_path_parquet)
 
@@ -119,6 +118,11 @@ except requests.exceptions.RequestException as e:
                 "AWS_ACCESS_KEY_ID": Variable.get("AWS_ACCESS_KEY"),
                 "AWS_SECRET_ACCESS_KEY": Variable.get("AWS_SECRET_KEY"),
                 "AWS_DEFAULT_REGION": Variable.get("AWS_DEFAULT_REGION"),
+                "TOKEN": TOKEN,
+                "S3_BUCKET": S3_BUCKET,
+                "S3_KEY_PREFIX": S3_KEY_PREFIX,
+                "URL": url,
+                "FILENAME": filename,
             },
         )
 
