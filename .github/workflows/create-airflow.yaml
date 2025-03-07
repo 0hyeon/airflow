@@ -1,105 +1,87 @@
 name: create-airflow
 
-on:
-  create:
-  push:
+on: push
 
 jobs:
   oncreated:
-    # ✅ 새로운 브랜치가 생성될 때만 실행
-    if: github.event_name == 'create'
-    runs-on: airflow
+    if: ${{ github.event.created == true }}
+    runs-on: [airflow]
     steps:
-      - name: Checkout repo
+      - name: checkout repo
         uses: actions/checkout@v2
         with:
           repository: 0hyeon/airflow
           path: airflow
           ref: ${{ github.ref }}
 
-      - name: Install kubectl, helm
+      - name: install kubectl, helm
         run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl && mv kubectl /usr/local/bin/kubectl
-          curl -LO "https://get.helm.sh/helm-v3.3.0-linux-amd64.tar.gz"
-          tar -zxvf helm-v3.3.0-linux-amd64.tar.gz
-          chmod +x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && mv kubectl /usr/local/bin/kubectl
+          curl -LO "https://get.helm.sh/helm-v3.3.0-linux-amd64.tar.gz" && tar -zxvf helm-v3.3.0-linux-amd64.tar.gz && chmod +x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm
 
-      - name: Get ref name
+      - name: get ref name
         run: |
           REF_NAME=${GITHUB_REF##*/}
+          echo running on branch ${REF_NAME}
           echo "REF_NAME=${REF_NAME}" >> $GITHUB_ENV
-          echo "Running on branch ${REF_NAME}"
 
-      - name: Create PG DB
+      - name: create pg db
         run: |
           cd airflow/lecture_2
+
           cat job/db-create.yaml | sed -r "s:BRANCH:${REF_NAME}:g" | kubectl apply -f -
 
-      - name: Sync DAGs
+      - name: sync dags
         run: |
           mkdir -p /data/airflow/airflow-${REF_NAME}/dags
           mkdir -p /data/airflow/airflow-${REF_NAME}/logs
 
-          if [ -d "airflow/lecture_2/dags" ]; then
-            mv airflow/lecture_2/dags/* /data/airflow/airflow-${REF_NAME}/dags/
-          else
-            echo "⚠️ DAGs 폴더가 존재하지 않습니다. 실행 중단"
-            exit 1
-          fi
+          mv airflow/lecture_2/dags/* /data/airflow/airflow-${REF_NAME}/dags/
 
           chmod -R 777 /data/airflow/airflow-${REF_NAME}
 
-      - name: Create Airflow
+      - name: create airflow
         run: |
           cd airflow/lecture_2
+
           helm template airflow --set appName=${REF_NAME} | kubectl apply -f -
 
-      - name: Show Airflow IP
+      - name: show airflow ip
         run: |
           sleep 10
           kubectl describe svc airflow-${REF_NAME} | grep "LoadBalancer Ingress"
 
   onpushed:
-    # ✅ 기존 브랜치에 푸시될 때만 실행
-    if: github.event_name == 'push'
-    runs-on: airflow
+    if: ${{ github.event.created == false }}
+    runs-on: [airflow]
     steps:
-      - name: Checkout repo
+      - name: checkout repo
         uses: actions/checkout@v2
         with:
           repository: 0hyeon/airflow
           path: airflow
           ref: ${{ github.ref }}
 
-      - name: Install kubectl, helm
+      - name: install kubectl, helm
         run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl && mv kubectl /usr/local/bin/kubectl
-          curl -LO "https://get.helm.sh/helm-v3.3.0-linux-amd64.tar.gz"
-          tar -zxvf helm-v3.3.0-linux-amd64.tar.gz
-          chmod +x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x kubectl && mv kubectl /usr/local/bin/kubectl
+          curl -LO "https://get.helm.sh/helm-v3.3.0-linux-amd64.tar.gz" && tar -zxvf helm-v3.3.0-linux-amd64.tar.gz && chmod +x linux-amd64/helm && mv linux-amd64/helm /usr/local/bin/helm
 
-      - name: Get ref name
+      - name: get ref name
         run: |
           REF_NAME=${GITHUB_REF##*/}
+          echo running on branch ${REF_NAME}
           echo "REF_NAME=${REF_NAME}" >> $GITHUB_ENV
-          echo "Running on branch ${REF_NAME}"
 
-      - name: Sync DAGs
+      - name: sync dags
         run: |
           mkdir -p /data/airflow/airflow-${REF_NAME}/dags
           mkdir -p /data/airflow/airflow-${REF_NAME}/logs
 
-          if [ -d "airflow/lecture_2/dags" ]; then
-            mv airflow/lecture_2/dags/* /data/airflow/airflow-${REF_NAME}/dags/
-          else
-            echo "⚠️ DAGs 폴더가 존재하지 않습니다. 실행 중단"
-            exit 1
-          fi
+          mv airflow/lecture_2/dags/* /data/airflow/airflow-${REF_NAME}/dags/
 
           chmod -R 777 /data/airflow/airflow-${REF_NAME}
 
-      - name: Show Airflow IP
+      - name: show airflow ip
         run: |
           kubectl describe svc airflow-${REF_NAME} | grep "LoadBalancer Ingress"
