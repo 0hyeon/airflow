@@ -48,11 +48,11 @@ with DAG(
         task = KubernetesPodOperator(
             task_id=f"fetch_and_save_{index}",
             name=f"fetch-and-save-data-{index}",
-            namespace="airflow",
+            namespace="default",  # ✅ namespace 변경 (필요하면 "airflow"로 수정)
             image="0hyeon/hyeon-airflow-image:latest",  # ✅ 사용자 정의 이미지 사용
             cmds=["python", "-c"],
             arguments=[
-                """
+                f"""
 import requests
 import boto3
 import pandas as pd
@@ -65,7 +65,7 @@ yesterday = datetime.now() - timedelta(days=1)
 yesterday_str = yesterday.strftime('%Y-%m-%d')
 
 TOKEN = os.getenv("TOKEN")
-HEADERS = {"accept": "application/json", "authorization": f"Bearer {TOKEN}"}
+HEADERS = {{"accept": "application/json", "authorization": f"Bearer {TOKEN}"}}
 S3_BUCKET = os.getenv("S3_BUCKET")
 S3_KEY_PREFIX = os.getenv("S3_KEY_PREFIX")
 
@@ -89,7 +89,7 @@ try:
     )
     s3_client = session.client("s3")
 
-    df = pd.read_csv(StringIO(csv_data), encoding="utf-8-sig", low_memory=False, dtype={'Postal Code': str})
+    df = pd.read_csv(StringIO(csv_data), encoding="utf-8-sig", low_memory=False, dtype={{'Postal Code': str}})
 
     if df.empty:
         print(f"⚠️ DataFrame is empty for {filename}, skipping S3 upload.")
@@ -98,10 +98,10 @@ try:
     temp_file_parquet = f"/tmp/{filename}.parquet"
     df.to_parquet(temp_file_parquet, engine="pyarrow", index=False)
 
-    file_path_parquet = f"{S3_KEY_PREFIX}date={yesterday_str}/{filename}.parquet"
+    file_path_parquet = f"{{S3_KEY_PREFIX}}date={{yesterday_str}}/{{filename}}.parquet"
     s3_client.upload_file(temp_file_parquet, S3_BUCKET, file_path_parquet)
 
-    print(f"✅ Parquet 업로드 완료: s3://{S3_BUCKET}/{file_path_parquet}")
+    print(f"✅ Parquet 업로드 완료: s3://{{S3_BUCKET}}/{{file_path_parquet}}")
     os.remove(temp_file_parquet)
     exit(0)
 
