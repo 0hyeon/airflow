@@ -29,7 +29,19 @@ jobs:
         run: |
           cd airflow/lecture_2
 
+          # 브랜치별 DB 생성
           cat job/db-create.yaml | sed -r "s:BRANCH:${REF_NAME}:g" | kubectl apply -f -
+
+      - name: update airflow configmap
+        run: |
+          kubectl get configmap airflow-config -o yaml | \
+          sed -r "s/postgresql:\/\/airflow:airflow@airflow-postgres:5432\/airflow/postgresql:\/\/airflow:airflow@airflow-postgres:5432\/airflow-${REF_NAME}/g" | \
+          kubectl apply -f -
+
+      - name: restart airflow pods
+        run: |
+          kubectl delete pod -l deploy=airflow-web
+          kubectl delete pod -l deploy=airflow-scheduler
 
       - name: sync dags
         run: |
