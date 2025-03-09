@@ -18,6 +18,7 @@ data:
   AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG: "2.3.2"
   AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE: "/airflow-pod.yaml"
   AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: "postgresql://airflow:airflow@airflow-postgres:5432/airflow"
+
 ---
 # Source: airflow/templates/airflow-templates.yaml
 apiVersion: v1

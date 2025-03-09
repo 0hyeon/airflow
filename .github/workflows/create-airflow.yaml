@@ -28,8 +28,7 @@ jobs:
       - name: create pg db
         run: |
           cd airflow/lecture_2
-
-          cat job/db-create.yaml | sed -r "s:BRANCH:${REF_NAME}:g" | kubectl apply -f -
+          cat job/db-create.yaml | sed -r "s:BRANCH:airflow:g" | kubectl apply -f -
 
       - name: sync dags
         run: |
