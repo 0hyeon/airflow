@@ -1,5 +1,4 @@
 ---
-#
 # Source: airflow/templates/airflow-config.yaml
 # https://airflow.apache.org/docs/apache-airflow/2.3.2/configurations-ref.html
 apiVersion: v1
@@ -18,7 +17,6 @@ data:
   AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG: "2.3.2"
   AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE: "/airflow-pod.yaml"
   AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: "postgresql://airflow:airflow@airflow-postgres:5432/airflow"
-
 ---
 # Source: airflow/templates/airflow-templates.yaml
 apiVersion: v1
@@ -34,7 +32,7 @@ data:
     kind: Pod
     metadata: dummy
     spec:
-      restartPolicy: Never
+      restartPollicy: Never
       containers:
         - name: base
           envFrom:
@@ -213,11 +211,13 @@ spec:
       targetPort: 8080
 ---
 # Source: airflow/templates/airflow-deployment.yaml
-# Airflow 웹서버 (Webserver)
 kind: StatefulSet
 apiVersion: apps/v1
 metadata:
   name: airflow-web
+  labels:
+    app.kubernetes.io/instance: airflow
+    app.kubernetes.io/name: airflow
 spec:
   serviceName: airflow
   replicas: 1
@@ -231,17 +231,16 @@ spec:
     spec:
       containers:
         - name: airflow-web
-          # image: apache/airflow:2.3.2
-          image: 0hyeon/hyeon-airflow-image:latest
+          image: apache/airflow:2.3.2
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
-          envFrom:
-            - configMapRef:
-                name: airflow-config
           env:
             - name: AIRFLOW__CORE__EXECUTOR
               value: "KubernetesExecutor"
+          envFrom:
+            - configMapRef:
+                name: airflow-config
           volumeMounts:
             - name: airflow-pvc
               mountPath: /dags
@@ -252,13 +251,9 @@ spec:
             - name: airflow-templates
               mountPath: /opt/airflow/webserver_config.py
               subPath: airflow-web-config-template.py
-            - name: nfs-env-volume # ✅ NFS 볼륨 추가
-              mountPath: /mnt/nts
           command: ["/bin/bash", "-c"]
           args:
-            - python -m pip install --no-cache-dir pandas boto3 requests pyarrow confluent-kafka apache-airflow-providers-cncf-kubernetes &&
-              export $(grep -v '^#' /mnt/nts/.env | xargs) && airflow webserver;
-
+            - airflow webserver;
       restartPolicy: Always
       volumes:
         - name: airflow-pvc
@@ -270,17 +265,15 @@ spec:
             items:
               - key: airflow-web-config-template.py
                 path: airflow-web-config-template.py
-        - name: nfs-env-volume # ✅ NFS 볼륨 추가
-          persistentVolumeClaim:
-            claimName: nfs-pvc
-
 ---
 # Source: airflow/templates/airflow-deployment.yaml
-# Airflow 스케줄러 (Scheduler)
 kind: StatefulSet
 apiVersion: apps/v1
 metadata:
   name: airflow-scheduler
+  labels:
+    app.kubernetes.io/instance: airflow
+    app.kubernetes.io/name: airflow
 spec:
   serviceName: airflow
   replicas: 1
@@ -292,11 +285,29 @@ spec:
       labels:
         deploy: airflow-scheduler
     spec:
+      initContainers:
+        - name: init-db
+          image: apache/airflow:2.3.2
+          imagePullPolicy: Always
+          env:
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              value: "postgresql://airflow:airflow@airflow-postgres:5432/airflow"
+          command: ["/bin/bash", "-c"]
+          args:
+            - until [ -n "`psql $AIRFLOW__DATABASE__SQL_ALCHEMY_CONN -l`" ]; do echo "Waiting"; sleep 10; done;
+              airflow db init;
+              airflow users create --username admin --firstname admin --lastname admin --role Admin --email djdjdjk2006@naver.com --password admin
+          volumeMounts:
+            - name: airflow-pvc
+              mountPath: /airflow
+              subPath: airflow
       containers:
         - name: airflow-scheduler
-          # image: apache/airflow:2.3.2
-          image: 0hyeon/hyeon-airflow-image:latest
+          image: apache/airflow:2.3.2
           imagePullPolicy: Always
+          env:
+            - name: AIRFLOW__CORE__EXECUTOR
+              value: "KubernetesExecutor"
           envFrom:
             - configMapRef:
                 name: airflow-config
@@ -310,13 +321,9 @@ spec:
             - name: airflow-templates
               mountPath: /airflow-pod.yaml
               subPath: airflow-pod.yaml
-            - name: nfs-env-volume
-              mountPath: /mnt/nts
           command: ["/bin/bash", "-c"]
           args:
-            - python -m pip install --no-cache-dir pandas boto3 requests pyarrow confluent-kafka apache-airflow-providers-cncf-kubernetes &&
-              export $(grep -v '^#' /mnt/nts/.env | xargs) && airflow scheduler;
-
+            - airflow scheduler;
       restartPolicy: Always
       volumes:
         - name: airflow-pvc
@@ -329,6 +336,3 @@ spec:
               - key: airflow-pod.yaml
                 path: airflow-pod.yaml
                 mode: 0777
-        - name: nfs-env-volume # 📌 NFS 볼륨 추가
-          persistentVolumeClaim:
-            claimName: nfs-pvc

@@ -16,23 +16,23 @@ spec:
     spec:
       containers:
         - name: main
-          image: 0hyeon/worker:0.1.4
-          imagePullPolicy: Always  # 🔥 매번 최신 이미지 가져오기
+          image: 0hyeon/worker:0.1.0
+          imagePullPolicy: Always # 🔥 매번 최신 이미지 가져오기
           env:
             - name: JOBKOREA_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: jobkorea-token-secret
                   key: JOBKOREA_TOKEN
-          command: ['/bin/bash', '-c']
+          command: ["/bin/bash", "-c"]
           args:
             - git clone -b 0hyeon https://github.com/0hyeon/airflow &&
               cd airflow/lecture_1/deploy/worker/src &&
               python main.py
           volumeMounts:
-          - name: nfs-volume
-            mountPath: /data
+            - name: nfs-volume
+              mountPath: /data
       volumes:
-      - name: nfs-volume
-        persistentVolumeClaim:
-          claimName: nfs-pvc
+        - name: nfs-volume
+          persistentVolumeClaim:
+            claimName: nfs-pvc
