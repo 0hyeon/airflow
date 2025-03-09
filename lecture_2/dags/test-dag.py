@@ -10,6 +10,7 @@ from airflow.models import Variable
 from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
 from airflow.utils.dates import days_ago
 
+#
 # 날짜 설정
 current_date = datetime.now()
 yesterday = current_date - timedelta(days=1)
