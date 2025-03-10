@@ -129,6 +129,15 @@ except requests.exceptions.RequestException as e:
                 "URL": url,
                 "FILENAME": filename,
             },
+            executor_config={  # ✅ Kubernetes에서 직접 restartPolicy 설정
+                "KubernetesExecutor": {
+                    "pod_override": {
+                        "spec": {
+                            "restartPolicy": "Never"
+                        }
+                    }
+                }
+            }
         )
 
         if previous_task:
