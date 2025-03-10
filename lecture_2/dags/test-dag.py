@@ -115,6 +115,7 @@ except requests.exceptions.RequestException as e:
                 """
             ],
             is_delete_operator_pod=True,  # ✅ 실행 후 Pod 자동 삭제
+            termination_grace_period_seconds=0,  
             get_logs=True,
             in_cluster=True,
             config_file=None,
