@@ -10,7 +10,7 @@ from airflow.models import Variable
 from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
 from airflow.utils.dates import days_ago
 
-####
+###
 # 날짜 설정
 current_date = datetime.now()
 yesterday = current_date - timedelta(days=1)
@@ -19,6 +19,8 @@ yesterday_str = yesterday.strftime('%Y-%m-%d')  # ✅ 문자열로 변환
 TOKEN = Variable.get("TOKEN")
 HEADERS = {"accept": "application/json", "authorization": f"Bearer {TOKEN}"}
 
+S3_BUCKET = "fc-practice2"
+S3_KEY_PREFIX = "apps_flyer_jobko/"
 URLS = {
     "data_aos_onepick_ua": f"https://hq1.appsflyer.com/api/raw-data/export/app/com.jobkorea.app/in_app_events_report/v5?timezone=Asia%2FSeoul&from={yesterday:%Y-%m-%d}&to={yesterday:%Y-%m-%d}&category=standard&event_name=1pick_view_jobposting&additional_fields=device_category,match_type,conversion_type,campaign_type,device_model,keyword_id",
     "data_aos_onepick_retarget": f"https://hq1.appsflyer.com/api/raw-data/export/app/com.jobkorea.app/in-app-events-retarget/v5?timezone=Asia%2FSeoul&from={yesterday:%Y-%m-%d}&to={yesterday:%Y-%m-%d}&category=standard&event_name=1pick_view_jobposting&additional_fields=device_category,match_type,conversion_type,campaign_type,device_model,keyword_id",
@@ -29,10 +31,11 @@ URLS = {
     "data_ios_ua": f"https://hq1.appsflyer.com/api/raw-data/export/app/id569092652/in_app_events_report/v5?timezone=Asia%2FSeoul&category=standard&from={yesterday:%Y-%m-%d}&to={yesterday:%Y-%m-%d}&event_name=careercheck_assess_complete,high_view_jobposting,high_scrap_notice,high_direct_apply,high_homepage_apply,event_2411_tvc_apply,nhis_resistration_complete,1st_update_complete,job_apply_complete_homepage,job_apply_complete_mobile,resume_complete_re,signup_all,re_update_complete,minikit_complete,resume_complete_1st,jobposting_complete,1pick_direct_apply,business_signup_complete,1pick_offer_apply,1pick_start&additional_fields=device_category,match_type,conversion_type,campaign_type,device_model,keyword_id",
     "data_ios_retarget": f"https://hq1.appsflyer.com/api/raw-data/export/app/id569092652/in-app-events-retarget/v5?timezone=Asia%2FSeoul&category=standard&from={yesterday:%Y-%m-%d}&to={yesterday:%Y-%m-%d}&event_name=careercheck_assess_complete,high_view_jobposting,high_scrap_notice,high_direct_apply,high_homepage_apply,event_2411_tvc_apply,nhis_resistration_complete,job_apply_complete_mobile,1st_update_complete,signup_all,resume_complete_1st,resume_complete_re,minikit_complete,re_update_complete,1pick_direct_apply,job_apply_complete_homepage,jobposting_complete,1pick_start&additional_fields=device_category,match_type,conversion_type,campaign_type,device_model,keyword_id",
 }
-S3_BUCKET = "fc-practice2"
-S3_KEY_PREFIX = "apps_flyer_jobko/"
 
-# Airflow DAG 설정
+#버킷 저장 위치 
+#https://fc-practice2.s3.ap-northeast-2.amazonaws.com/apps_flyer_jobko/date=2025-03-06/data_aos_onepick_retarget.parquet
+
+#Airflow DAG 설정
 default_args = {
     "owner": "airflow",
     "start_date": days_ago(1),
@@ -42,7 +45,7 @@ default_args = {
 with DAG(
     dag_id="jobko_apps_deduction_daily_to_s3_storage_sequential",
     default_args=default_args,
-    schedule_interval="@daily",
+    schedule_interval=None, #✅ 수동 실행만 가능하도록 변경
     catchup=False,
 ) as dag:
 
@@ -143,3 +146,4 @@ except requests.exceptions.RequestException as e:
         if previous_task:
             previous_task >> task  # ✅ 순차 실행
         previous_task = task
+    
