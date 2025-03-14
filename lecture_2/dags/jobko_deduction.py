@@ -71,7 +71,6 @@ JOB_FLOW_OVERRIDES = {
     "ServiceRole": "EMR_DefaultRole",  # ✅ use-default-roles 적용
     "AutoTerminationPolicy": {"IdleTimeout": 3600},  # ✅ 1시간 후 자동 종료
     "LogUri": f"s3://{S3_BUCKET}/emr-logs/",  # ✅ 로그 저장 위치
-    "Region": "ap-northeast-2"  # ✅ 추가
 }
 
 
@@ -95,7 +94,6 @@ create_emr_cluster = EmrCreateJobFlowOperator(
     task_id="create_emr_cluster",
     job_flow_overrides=JOB_FLOW_OVERRIDES,
     aws_conn_id="aws_default",
-    on_name="ap-northeast-2",  # ✅ AWS 리전 추가
     dag=dag,
 )
 
@@ -148,7 +146,6 @@ run_emr_spark = EmrAddStepsOperator(
     task_id="run_emr_spark",
     job_flow_id="{{ ti.xcom_pull(task_ids='create_emr_cluster', key='return_value') }}",  # ✅ 수정
     aws_conn_id="aws_default",
-    region_name="ap-northeast-2",  # ✅ AWS 리전 추가
     steps=[
         {
             "Name": "Process Parquet with PySpark",
