@@ -58,7 +58,6 @@ with DAG(
             namespace="default",  # ✅ namespace 변경 (필요하면 "airflow"로 수정)
             image="0hyeon/hyeon-airflow-image:latest",  # ✅ 사용자 정의 이미지 사용
             cmds=["python", "-c"],
-            restart_policy="Never",
             arguments=[
                 f"""
 import requests
