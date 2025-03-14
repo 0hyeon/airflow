@@ -9,7 +9,7 @@ from airflow.providers.amazon.aws.operators.emr import EmrCreateJobFlowOperator
 from airflow.exceptions import AirflowException
 from airflow.models import Variable
 # 1. 날짜 설정 (어제 날짜)
-yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+yesterday = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
 S3_BUCKET = "fc-practice2"
 S3_INPUT_PREFIX = f"apps_flyer_jobko/date={yesterday}/"
 S3_OUTPUT_PREFIX = f"apps_flyer_jobko/deduction_results/"
@@ -175,4 +175,5 @@ wait_for_previous_dag = ExternalTaskSensor(
 )
 
 # 8. DAG 실행 순서 설정
-trigger_previous_dag >> wait_for_previous_dag >> check_s3_files >> create_emr_cluster >> run_emr_spark
+check_s3_files >> create_emr_cluster >> run_emr_spark
+# trigger_previous_dag >> wait_for_previous_dag >> check_s3_files >> create_emr_cluster >> run_emr_spark
