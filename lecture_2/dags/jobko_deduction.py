@@ -25,20 +25,14 @@ JOB_FLOW_OVERRIDES = {
             {
                 "InstanceFleetType": "MASTER",
                 "InstanceTypeConfigs": [
-                    {
-                        "InstanceType": "m5.xlarge",
-                        "WeightedCapacity": 1
-                    }
+                    {"InstanceType": "m5.xlarge", "WeightedCapacity": 1}
                 ],
                 "TargetOnDemandCapacity": 1
             },
             {
                 "InstanceFleetType": "CORE",
                 "InstanceTypeConfigs": [
-                    {
-                        "InstanceType": "m5.xlarge",
-                        "WeightedCapacity": 1
-                    }
+                    {"InstanceType": "m5.xlarge", "WeightedCapacity": 1}
                 ],
                 "TargetOnDemandCapacity": 1,
                 "TargetSpotCapacity": 0
@@ -46,17 +40,15 @@ JOB_FLOW_OVERRIDES = {
             {
                 "InstanceFleetType": "TASK",
                 "InstanceTypeConfigs": [
-                    {
-                        "InstanceType": "c5.xlarge",
-                        "WeightedCapacity": 1
-                    }
+                    {"InstanceType": "c5.xlarge", "WeightedCapacity": 1}
                 ],
                 "TargetSpotCapacity": 1
             }
         ],
         "KeepJobFlowAliveWhenNoSteps": False,  # ✅ Auto-Terminate 설정
         "Ec2KeyName": "test",  # ✅ EC2 Key 설정
-        "TerminationProtected": False,  # ✅ 종료 가능하도록 설정
+        "Ec2SubnetId": "subnet-099a9e797600436bd",  # ✅ 서브넷 추가
+        "TerminationProtected": False  # ✅ 종료 가능하도록 설정
     },
     "ManagedScalingPolicy": {  # ✅ Managed Scaling Policy 추가
         "ComputeLimits": {
