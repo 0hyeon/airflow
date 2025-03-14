@@ -140,7 +140,7 @@ run_emr_spark = EmrAddStepsOperator(
                 "Args": [
                     "spark-submit",
                     "--deploy-mode", "cluster",
-                    "s3://my-spark-scripts/process_parquet.py",
+                    "s3://fc-practice2/scripts/jobko_deduction.py",
                     f"s3://{S3_BUCKET}/{S3_INPUT_PREFIX}",
                     f"s3://{S3_BUCKET}/{S3_OUTPUT_PREFIX}"
                 ],
