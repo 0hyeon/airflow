@@ -7,6 +7,7 @@ import boto3
 from datetime import datetime, timedelta
 from airflow.providers.amazon.aws.operators.emr import EmrCreateJobFlowOperator
 from airflow.exceptions import AirflowException
+from airflow.models import Variable
 # 1. 날짜 설정 (어제 날짜)
 yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
 S3_BUCKET = "fc-practice2"
@@ -98,7 +99,15 @@ create_emr_cluster = EmrCreateJobFlowOperator(
 
 # 4. S3 파일 8개가 모두 존재하는지 확인하는 함수
 def check_all_s3_files():
-    s3 = boto3.client("s3", region_name=AWS_REGION)
+    
+    session = boto3.Session(
+        aws_access_key_id=Variable.get("AWS_ACCESS_KEY"),
+        aws_secret_access_key=Variable.get("AWS_SECRET_KEY"),
+        region_name=Variable.get("AWS_DEFAULT_REGION"),
+    )
+
+    s3 = session.client("s3")
+    
     files = [
         "data_aos_onepick_retarget.parquet",
         "data_aos_onepick_ua.parquet",
