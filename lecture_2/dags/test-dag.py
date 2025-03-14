@@ -129,6 +129,16 @@ except requests.exceptions.RequestException as e:
                 "URL": url,
                 "FILENAME": filename,
             },
+            executor_config={
+                "KubernetesExecutor": {
+                    "pod_override": {
+                        "spec": {
+                            "terminationGracePeriodSeconds": 0  # ✅ 종료 후 즉시 삭제
+                        }
+                    }
+                }
+            }
+
         )
 
         if previous_task:

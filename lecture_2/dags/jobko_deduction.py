@@ -109,17 +109,23 @@ def check_all_s3_files():
         "data_ios_ua.parquet",
     ]
 
-    missing_files = []
+    response = s3.list_objects_v2(Bucket=S3_BUCKET, Prefix=S3_INPUT_PREFIX)
+
+    if "Contents" not in response:
+        raise AirflowException(f"❌ '{S3_INPUT_PREFIX}' 경로에 파일이 없음!")
+
+    # ✅ S3에서 실제 존재하는 파일 목록 가져오기
+    existing_files = {obj["Key"].split("/")[-1] for obj in response["Contents"]}
     
-    for file in files:
-        s3_path = f"{S3_INPUT_PREFIX}{file}"
-        try:
-            s3.head_object(Bucket=S3_BUCKET, Key=s3_path)
-        except Exception:
-            missing_files.append(s3_path)
+    # ✅ 필요한 파일과 비교하여 누락된 파일 확인
+    missing_files = [file for file in files if file not in existing_files]
 
     if missing_files:
-        raise AirflowException(f"❌ S3 파일이 존재하지 않음: {missing_files}")
+        raise AirflowException(f"❌ S3에 누락된 파일: {missing_files}")
+
+    print(f"✅ S3에 모든 파일이 존재합니다.")
+
+
 check_s3_files = PythonOperator(
     task_id="check_s3_files",
     python_callable=check_all_s3_files,
