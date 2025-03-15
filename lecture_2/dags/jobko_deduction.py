@@ -21,38 +21,34 @@ JOB_FLOW_OVERRIDES = {
     "ReleaseLabel": "emr-6.10.0",  # ✅ EMR 버전 반영
     "Applications": [{"Name": "Spark"}],  # ✅ Spark 추가
     "Instances": {
-        "InstanceFleets": [
+        "InstanceGroups": [
             {
-                "InstanceFleetType": "MASTER",
-                "InstanceTypeConfigs": [
-                    {"InstanceType": "m5.xlarge", "WeightedCapacity": 1}
-                ],
-                "TargetOnDemandCapacity": 1
+                "InstanceRole": "MASTER",  # ✅ InstanceFleetType → InstanceRole
+                "InstanceType": "m5.xlarge",  # ✅ InstanceTypeConfigs 제거 후 단일 타입 사용
+                "Market": "ON_DEMAND",  # ✅ On-Demand 인스턴스 사용
+                "InstanceCount": 1  # ✅ TargetOnDemandCapacity → InstanceCount
             },
             {
-                "InstanceFleetType": "CORE",
-                "InstanceTypeConfigs": [
-                    {"InstanceType": "m5.xlarge", "WeightedCapacity": 1}
-                ],
-                "TargetOnDemandCapacity": 1,
-                "TargetSpotCapacity": 0
+                "InstanceRole": "CORE",
+                "InstanceType": "m5.xlarge",
+                "Market": "ON_DEMAND",
+                "InstanceCount": 2  # ✅ CORE 노드는 2개 (원하는 개수로 변경 가능)
             },
             {
-                "InstanceFleetType": "TASK",
-                "InstanceTypeConfigs": [
-                    {"InstanceType": "c5.xlarge", "WeightedCapacity": 1}
-                ],
-                "TargetSpotCapacity": 1
+                "InstanceRole": "TASK",
+                "InstanceType": "c5.xlarge",
+                "Market": "SPOT",  # ✅ TASK 노드는 Spot 사용 가능
+                "InstanceCount": 1  # ✅ Spot 용량 조절 가능
             }
         ],
-        "KeepJobFlowAliveWhenNoSteps": False,  # ✅ Auto-Terminate 설정
         "Ec2KeyName": "test",  # ✅ EC2 Key 설정
         "Ec2SubnetId": "subnet-099a9e797600436bd",  # ✅ 서브넷 추가
+        "KeepJobFlowAliveWhenNoSteps": False,  # ✅ Auto-Terminate 설정
         "TerminationProtected": False  # ✅ 종료 가능하도록 설정
     },
     "ManagedScalingPolicy": {  # ✅ Managed Scaling Policy 추가
         "ComputeLimits": {
-            "UnitType": "InstanceFleetUnits",
+            "UnitType": "Instances",
             "MinimumCapacityUnits": 3,
             "MaximumCapacityUnits": 15,
             "MaximumCoreCapacityUnits": 10,
