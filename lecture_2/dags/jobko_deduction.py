@@ -23,42 +23,42 @@ JOB_FLOW_OVERRIDES = {
     "Instances": {
         "InstanceGroups": [
             {
-                "InstanceRole": "MASTER",  # ✅ InstanceFleetType → InstanceRole
-                "InstanceType": "m5.xlarge",  # ✅ InstanceTypeConfigs 제거 후 단일 타입 사용
-                "Market": "ON_DEMAND",  # ✅ On-Demand 인스턴스 사용
-                "InstanceCount": 1  # ✅ TargetOnDemandCapacity → InstanceCount
+                "InstanceRole": "MASTER",
+                "InstanceType": "m5.xlarge",
+                "Market": "ON_DEMAND",
+                "InstanceCount": 1
             },
             {
                 "InstanceRole": "CORE",
                 "InstanceType": "m5.xlarge",
                 "Market": "ON_DEMAND",
-                "InstanceCount": 2  # ✅ CORE 노드는 2개 (원하는 개수로 변경 가능)
+                "InstanceCount": 2
             },
             {
                 "InstanceRole": "TASK",
                 "InstanceType": "c5.xlarge",
-                "Market": "SPOT",  # ✅ TASK 노드는 Spot 사용 가능
-                "InstanceCount": 1  # ✅ Spot 용량 조절 가능
+                "Market": "SPOT",
+                "InstanceCount": 1
             }
         ],
-        "Ec2KeyName": "test",  # ✅ EC2 Key 설정
-        "Ec2SubnetId": "subnet-099a9e797600436bd",  # ✅ 서브넷 추가
-        "KeepJobFlowAliveWhenNoSteps": False,  # ✅ Auto-Terminate 설정
-        "TerminationProtected": False  # ✅ 종료 가능하도록 설정
+        "Ec2KeyName": "test",
+        "Ec2SubnetId": "subnet-099a9e797600436bd",
+        "KeepJobFlowAliveWhenNoSteps": False,
+        "TerminationProtected": False
     },
-    "ManagedScalingPolicy": {  # ✅ Managed Scaling Policy 추가
+    "ManagedScalingPolicy": {  
         "ComputeLimits": {
             "UnitType": "Instances",
             "MinimumCapacityUnits": 3,
             "MaximumCapacityUnits": 15,
-            "MaximumCoreCapacityUnits": 10,
-            "MaximumOnDemandCapacityUnits": 5
+            "MaximumCoreCapacityUnits": 5,   # ✅ 수정
+            "MaximumOnDemandCapacityUnits": 10  # ✅ 수정
         }
     },
-    "JobFlowRole": "EMR_EC2_DefaultRole",  # ✅ use-default-roles 적용
-    "ServiceRole": "EMR_DefaultRole",  # ✅ use-default-roles 적용
-    "AutoTerminationPolicy": {"IdleTimeout": 3600},  # ✅ 1시간 후 자동 종료
-    "LogUri": f"s3://{S3_BUCKET}/emr-logs/",  # ✅ 로그 저장 위치
+    "JobFlowRole": "EMR_EC2_DefaultRole",
+    "ServiceRole": "EMR_DefaultRole",
+    "AutoTerminationPolicy": {"IdleTimeout": 3600},
+    "LogUri": f"s3://{S3_BUCKET}/emr-logs/"
 }
 
 
