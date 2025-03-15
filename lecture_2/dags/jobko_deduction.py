@@ -21,32 +21,44 @@ JOB_FLOW_OVERRIDES = {
     "Name": "fc_emr_cluster",
     "ReleaseLabel": "emr-6.10.0",
     "Applications": [{"Name": "Spark"}],
+
+    # ✅ 서브넷 지정 (여러 개 가능)
     "Instances": {
-        "InstanceGroups": [
-            {
-                "InstanceRole": "MASTER",
-                "InstanceType": "m6id.2xlarge",  # ✅ 사용 가능한 인스턴스 변경
-                "Market": "ON_DEMAND",
-                "InstanceCount": 1
-            },
-            {
-                "InstanceRole": "CORE",
-                "InstanceType": "m6id.2xlarge",  # ✅ 사용 가능한 인스턴스 변경
-                "Market": "ON_DEMAND",
-                "InstanceCount": 2
-            },
-            {
-                "InstanceRole": "TASK",
-                "InstanceType": "m6id.2xlarge",  # ✅ 사용 가능한 인스턴스 변경
-                "Market": "ON_DEMAND",  # ✅ SPOT → ON_DEMAND 변경
-                "InstanceCount": 1
-            }
-        ],
-        "Ec2KeyName": "test",
-        "Ec2SubnetId": "subnet-0b166f320e24c232f",  # ✅ 새로운 퍼블릭 서브넷 사용
+        "Ec2SubnetId": "subnet-0b166f320e24c232f",  # ✅ ap-northeast-2b 서브넷 (퍼블릭 여부 확인)
         "KeepJobFlowAliveWhenNoSteps": True,  # ✅ 클러스터 유지
         "TerminationProtected": False
     },
+
+    # ✅ Instance Fleet 설정
+    "InstanceFleets": [
+        {
+            "InstanceFleetType": "MASTER",
+            "InstanceTypeConfigs": [
+                {"InstanceType": "m6i.4xlarge", "WeightedCapacity": 2},  # ✅ 4xlarge 가중치 2
+                {"InstanceType": "r7i.2xlarge", "WeightedCapacity": 1}   # ✅ 2xlarge 가중치 1
+            ],
+            "TargetOnDemandCapacity": 1
+        },
+        {
+            "InstanceFleetType": "CORE",
+            "InstanceTypeConfigs": [
+                {"InstanceType": "m6i.4xlarge", "WeightedCapacity": 2},
+                {"InstanceType": "r7i.2xlarge", "WeightedCapacity": 1}
+            ],
+            "TargetOnDemandCapacity": 2
+        },
+        {
+            "InstanceFleetType": "TASK",
+            "InstanceTypeConfigs": [
+                {"InstanceType": "c6in.xlarge", "WeightedCapacity": 1},
+                {"InstanceType": "c5n.2xlarge", "WeightedCapacity": 1}
+            ],
+            "TargetOnDemandCapacity": 1,  
+            "TargetSpotCapacity": 1  # ✅ 일부 스팟 활용 가능
+        }
+    ],
+
+    # ✅ Managed Scaling 설정
     "ManagedScalingPolicy": {
         "ComputeLimits": {
             "UnitType": "Instances",
@@ -56,12 +68,11 @@ JOB_FLOW_OVERRIDES = {
             "MaximumOnDemandCapacityUnits": 10
         }
     },
+
     "JobFlowRole": "EMR_EC2_DefaultRole",
     "ServiceRole": "EMR_DefaultRole",
-    "AutoTerminationPolicy": {"IdleTimeout": 3600},
     "LogUri": f"s3://fc-practice2/emr-logs/"
 }
-
 
 # 2. DAG 기본 설정
 default_args = {
