@@ -22,43 +22,37 @@ JOB_FLOW_OVERRIDES = {
     "ReleaseLabel": "emr-6.10.0",
     "Applications": [{"Name": "Spark"}],
 
-    # ✅ 서브넷 지정 (여러 개 가능)
+    # ✅ 서브넷 지정
     "Instances": {
-        "Ec2SubnetId": "subnet-0b166f320e24c232f",  # ✅ ap-northeast-2b 서브넷 (퍼블릭 여부 확인)
-        "KeepJobFlowAliveWhenNoSteps": True,  # ✅ 클러스터 유지
-        "TerminationProtected": False
-    },
-
-    # ✅ Instance Fleet 설정
-    "InstanceFleets": [
+    "InstanceGroups": [
         {
-            "InstanceFleetType": "MASTER",
-            "InstanceTypeConfigs": [
-                {"InstanceType": "m6i.4xlarge", "WeightedCapacity": 2},  # ✅ 4xlarge 가중치 2
-                {"InstanceType": "r7i.2xlarge", "WeightedCapacity": 1}   # ✅ 2xlarge 가중치 1
-            ],
-            "TargetOnDemandCapacity": 1
+            "Name": "Master Nodes",
+            "Market": "ON_DEMAND",
+            "InstanceRole": "MASTER",
+            "InstanceType": "m5.xlarge",
+            "InstanceCount": 1
         },
         {
-            "InstanceFleetType": "CORE",
-            "InstanceTypeConfigs": [
-                {"InstanceType": "m6i.4xlarge", "WeightedCapacity": 2},
-                {"InstanceType": "r7i.2xlarge", "WeightedCapacity": 1}
-            ],
-            "TargetOnDemandCapacity": 2
+            "Name": "Core Nodes",
+            "Market": "ON_DEMAND",
+            "InstanceRole": "CORE",
+            "InstanceType": "m5.xlarge",
+            "InstanceCount": 1
         },
         {
-            "InstanceFleetType": "TASK",
-            "InstanceTypeConfigs": [
-                {"InstanceType": "c6in.xlarge", "WeightedCapacity": 1},
-                {"InstanceType": "c5n.2xlarge", "WeightedCapacity": 1}
-            ],
-            "TargetOnDemandCapacity": 1,  
-            "TargetSpotCapacity": 1  # ✅ 일부 스팟 활용 가능
+            "Name": "Task Nodes",
+            "Market": "SPOT",
+            "InstanceRole": "TASK",
+            "InstanceType": "c5.xlarge",
+            "InstanceCount": 1
         }
     ],
+    "Ec2SubnetId": "subnet-099a9e797600436bd",
+    "KeepJobFlowAliveWhenNoSteps": False,
+},
 
-    # ✅ Managed Scaling 설정
+
+    # ✅ Managed Scaling 설정 유지
     "ManagedScalingPolicy": {
         "ComputeLimits": {
             "UnitType": "Instances",
@@ -73,6 +67,7 @@ JOB_FLOW_OVERRIDES = {
     "ServiceRole": "EMR_DefaultRole",
     "LogUri": f"s3://fc-practice2/emr-logs/"
 }
+
 
 # 2. DAG 기본 설정
 default_args = {
