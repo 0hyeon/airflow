@@ -1,4 +1,8 @@
 # https://8grams.medium.com/how-to-setup-persistent-storage-with-nfs-on-gke-google-kubernetes-engine-the-proper-way-daf40b63c149
+# 클러스터 내 영구 저장소를 정의
+# 물리적 저장 공간(10Gi)을 할당하여 Kubernetes의 **PersistentVolume(PV)**로 설정
+# NFS와 연결되지 않으면 PVC(PersistentVolumeClaim)가 PV를 찾을 수 없음!
+
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -11,7 +15,7 @@ spec:
     - ReadWriteMany
   nfs:
     server: nfs-server.default.svc.cluster.local
-    path: "/"
+    path: '/'
 
 ---
 kind: PersistentVolumeClaim
@@ -21,7 +25,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteMany
-  storageClassName: ""
+  storageClassName: ''
   resources:
     requests:
       storage: 10Gi
