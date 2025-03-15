@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from airflow.providers.amazon.aws.operators.emr import EmrCreateJobFlowOperator
 from airflow.exceptions import AirflowException
 from airflow.models import Variable
+#
 # 1. 날짜 설정 (어제 날짜)
 yesterday = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
 S3_BUCKET = "fc-practice2"
