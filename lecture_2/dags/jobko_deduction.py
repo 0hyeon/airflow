@@ -19,47 +19,47 @@ AWS_REGION = "ap-northeast-2"
 # 1_2. 클러스터생성 사양 
 JOB_FLOW_OVERRIDES = {
     "Name": "fc_emr_cluster",
-    "ReleaseLabel": "emr-6.10.0",  # ✅ EMR 버전 반영
-    "Applications": [{"Name": "Spark"}],  # ✅ Spark 추가
+    "ReleaseLabel": "emr-6.10.0",
+    "Applications": [{"Name": "Spark"}],
     "Instances": {
         "InstanceGroups": [
             {
                 "InstanceRole": "MASTER",
-                "InstanceType": "m5.xlarge",
+                "InstanceType": "m6id.2xlarge",  # ✅ 사용 가능한 인스턴스 변경
                 "Market": "ON_DEMAND",
                 "InstanceCount": 1
             },
             {
                 "InstanceRole": "CORE",
-                "InstanceType": "m5.xlarge",
+                "InstanceType": "m6id.2xlarge",  # ✅ 사용 가능한 인스턴스 변경
                 "Market": "ON_DEMAND",
                 "InstanceCount": 2
             },
             {
                 "InstanceRole": "TASK",
-                "InstanceType": "c5.xlarge",
-                "Market": "SPOT",
+                "InstanceType": "m6id.2xlarge",  # ✅ 사용 가능한 인스턴스 변경
+                "Market": "ON_DEMAND",  # ✅ SPOT → ON_DEMAND 변경
                 "InstanceCount": 1
             }
         ],
         "Ec2KeyName": "test",
-        "Ec2SubnetId": "subnet-099a9e797600436bd",
-        "KeepJobFlowAliveWhenNoSteps": False,
+        "Ec2SubnetId": "subnet-0b166f320e24c232f",  # ✅ 새로운 퍼블릭 서브넷 사용
+        "KeepJobFlowAliveWhenNoSteps": True,  # ✅ 클러스터 유지
         "TerminationProtected": False
     },
-    "ManagedScalingPolicy": {  
+    "ManagedScalingPolicy": {
         "ComputeLimits": {
             "UnitType": "Instances",
             "MinimumCapacityUnits": 3,
             "MaximumCapacityUnits": 15,
-            "MaximumCoreCapacityUnits": 5,   # ✅ 수정
-            "MaximumOnDemandCapacityUnits": 10  # ✅ 수정
+            "MaximumCoreCapacityUnits": 5,
+            "MaximumOnDemandCapacityUnits": 10
         }
     },
     "JobFlowRole": "EMR_EC2_DefaultRole",
     "ServiceRole": "EMR_DefaultRole",
     "AutoTerminationPolicy": {"IdleTimeout": 3600},
-    "LogUri": f"s3://{S3_BUCKET}/emr-logs/"
+    "LogUri": f"s3://fc-practice2/emr-logs/"
 }
 
 
