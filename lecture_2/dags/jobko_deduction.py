@@ -10,7 +10,7 @@ from airflow.exceptions import AirflowException
 from airflow.models import Variable
 #
 # 1. 날짜 설정 (어제 날짜)
-yesterday = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
+yesterday = (datetime.now() - timedelta(days=3)).strftime("%Y-%m-%d")
 S3_BUCKET = "fc-practice2"
 S3_INPUT_PREFIX = f"apps_flyer_jobko/date={yesterday}/"
 S3_OUTPUT_PREFIX = f"apps_flyer_jobko/deduction_results/"
